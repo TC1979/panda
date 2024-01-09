@@ -382,6 +382,7 @@ static int toyota_fwd_hook(int bus_num, int addr) {
     int is_lkas_msg = ((addr == 0x2E4) || (addr == 0x412) || (addr == 0x191));
     // in TSS2 the camera does ACC as well, so filter 0x343
     int is_acc_msg = (addr == 0x343);
+
     // Block AEB when stoped to use as a automatic brakehold
     int is_aeb_msg = (addr == 0x344);
     // int block_msg = is_lkas_msg || (is_acc_msg && !toyota_stock_longitudinal) || (is_aeb_msg && !vehicle_moving && acc_main_on && !gas_pressed);
