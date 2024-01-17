@@ -336,7 +336,7 @@ static bool toyota_tx_hook(CANPacket_t *to_send) {
 
     // AleSato's automatic brakehold
     int is_tss2 = (addr == 0x191);
-    if (addr == 0x344) {
+    if (addr == 0x344 && (alternative_experience & ALT_EXP_ALLOW_AEB)) {
       if ((is_tss2) && (vehicle_moving || gas_pressed || !acc_main_on)) {
         tx = false;
       }
@@ -384,7 +384,7 @@ static int toyota_fwd_hook(int bus_num, int addr) {
     // in TSS2 the camera does ACC as well, so filter 0x343
     int is_acc_msg = (addr == 0x343);
     // Block AEB when stoped to use as a automatic brakehold
-    int is_aeb_msg = (addr == 0x344);
+    int is_aeb_msg = (addr == 0x344 && (alternative_experience & ALT_EXP_ALLOW_AEB));
     // int block_msg = is_lkas_msg || (is_acc_msg && !toyota_stock_longitudinal) || (is_aeb_msg && !vehicle_moving && acc_main_on && !gas_pressed);
     // if (!block_msg) {
       // bus_fwd = 0;
