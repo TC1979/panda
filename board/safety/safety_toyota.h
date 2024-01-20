@@ -33,7 +33,7 @@ const int TOYOTA_LTA_MAX_DRIVER_TORQUE = 150;
 
 // longitudinal limits
 const LongitudinalLimits TOYOTA_LONG_LIMITS = {
-  .max_accel = 2000,   // 2.0 m/s2
+  .max_accel = 4000,   // 4.0 m/s2
   .min_accel = -3500,  // -3.5 m/s2
 };
 
@@ -43,18 +43,27 @@ const LongitudinalLimits TOYOTA_LONG_LIMITS = {
 const int TOYOTA_GAS_INTERCEPTOR_THRSLD = 805;
 #define TOYOTA_GET_INTERCEPTOR(msg) (((GET_BYTE((msg), 0) << 8) + GET_BYTE((msg), 1) + (GET_BYTE((msg), 2) << 8) + GET_BYTE((msg), 3)) / 2U) // avg between 2 tracks
 
-#define TOYOTA_COMMON_TX_MSGS                                                                                                               \
+// Stock longitudinal
+#define TOYOTA_COMMON_TX_MSGS                                                                                     \
+  {0x2E4, 0, 5}, {0x191, 0, 8}, {0x412, 0, 8}, {0x343, 0, 8}, {0x1D2, 0, 8},  /* LKAS + LTA + PCM cancel cmds */  \
+
+#define TOYOTA_COMMON_LONG_TX_MSGS                                                                                                          \
+  TOYOTA_COMMON_TX_MSGS                                                                                                                     \
   {0x283, 0, 7}, {0x2E6, 0, 8}, {0x2E7, 0, 8}, {0x33E, 0, 7}, {0x344, 0, 8}, {0x365, 0, 7}, {0x366, 0, 7}, {0x4CB, 0, 8},  /* DSU bus 0 */  \
   {0x128, 1, 6}, {0x141, 1, 4}, {0x160, 1, 8}, {0x161, 1, 7}, {0x470, 1, 4},  /* DSU bus 1 */                                               \
-  {0x2E4, 0, 5}, {0x191, 0, 8}, {0x411, 0, 8}, {0x412, 0, 8}, {0x343, 0, 8}, {0x1D2, 0, 8},  /* LKAS + ACC */                               \
+  {0x411, 0, 8},  /* PCS_HUD */                                                                                                             \
   {0x750, 0, 8}, // white list 0x750 for Enhanced Diagnostic Request
 
 const CanMsg TOYOTA_TX_MSGS[] = {
   TOYOTA_COMMON_TX_MSGS
 };
 
+const CanMsg TOYOTA_LONG_TX_MSGS[] = {
+  TOYOTA_COMMON_LONG_TX_MSGS
+};
+
 const CanMsg TOYOTA_INTERCEPTOR_TX_MSGS[] = {
-  TOYOTA_COMMON_TX_MSGS
+  TOYOTA_COMMON_LONG_TX_MSGS
   {0x200, 0, 6},  // gas interceptor
 };
 
