@@ -177,6 +177,13 @@ static void toyota_rx_hook(const CANPacket_t *to_push) {
       }
     }
 
+    // wrap lateral controls on main
+    if (addr == 0x1D3) {
+      // ACC main switch on is a prerequisite to enter controls, exit controls immediately on main switch off
+      // Signal: PCM_CRUISE_2/MAIN_ON at 15th bit 
+      acc_main_on = GET_BIT(to_push, 15U);
+    }
+
     // enter controls on rising edge of ACC, exit controls on ACC off
     // exit controls on rising edge of gas press
     if (addr == 0x1D2) {
@@ -188,13 +195,6 @@ static void toyota_rx_hook(const CANPacket_t *to_push) {
       if (!enable_gas_interceptor) {
         gas_pressed = GET_BIT(to_push, 4U) == 0U;
       }
-    }
-
-    // wrap lateral controls on main
-    if (addr == 0x1D3) {
-      // ACC main switch on is a prerequisite to enter controls, exit controls immediately on main switch off
-      // Signal: PCM_CRUISE_2/MAIN_ON at 15th bit 
-      acc_main_on = GET_BIT(to_push, 15U);
     }
 
     // sample speed
