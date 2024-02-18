@@ -348,9 +348,8 @@ static bool toyota_tx_hook(const CANPacket_t *to_send) {
     }
 
     // AleSato's automatic brakehold
-    int is_tss2 = (addr == 0x191);
     if ((addr == 0x344) && (alternative_experience & ALT_EXP_ALLOW_AEB)) {
-      if ((is_tss2) && (vehicle_moving || gas_pressed || !acc_main_on)) {
+      if ((addr == 0x191) && (vehicle_moving || gas_pressed || !acc_main_on)) {
         tx = false;
       }
     }
