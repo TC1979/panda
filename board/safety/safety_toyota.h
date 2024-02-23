@@ -44,8 +44,9 @@ const int TOYOTA_GAS_INTERCEPTOR_THRSLD = 805;
 #define TOYOTA_GET_INTERCEPTOR(msg) (((GET_BYTE((msg), 0) << 8) + GET_BYTE((msg), 1) + (GET_BYTE((msg), 2) << 8) + GET_BYTE((msg), 3)) / 2U) // avg between 2 tracks
 
 // Stock longitudinal
-#define TOYOTA_COMMON_TX_MSGS                                                                                     \
-  {0x2E4, 0, 5}, {0x191, 0, 8}, {0x412, 0, 8}, {0x343, 0, 8}, {0x1D2, 0, 8}, {0x750, 0, 8}, /* dp - white list 0x750 for Enhanced Diagnostic Request */ /* LKAS + LTA + ACC & PCM cancel cmds */  \
+#define TOYOTA_COMMON_TX_MSGS                                                                                           \
+  {0x2E4, 0, 5}, {0x191, 0, 8}, {0x412, 0, 8}, {0x343, 0, 8}, {0x1D2, 0, 8},  /* LKAS + LTA + ACC & PCM cancel cmds */  \
+  {0x750, 0, 8}, /* white list 0x750 for Enhanced Diagnostic Request */                                                 \
 
 #define TOYOTA_COMMON_LONG_TX_MSGS                                                                                                          \
   TOYOTA_COMMON_TX_MSGS                                                                                                                     \
@@ -177,13 +178,6 @@ static void toyota_rx_hook(const CANPacket_t *to_push) {
       }
     }
 
-    // wrap lateral controls on main
-    if (addr == 0x1D3) {
-      // ACC main switch on is a prerequisite to enter controls, exit controls immediately on main switch off
-      // Signal: PCM_CRUISE_2/MAIN_ON at 15th bit 
-      acc_main_on = GET_BIT(to_push, 15U);
-    }
-
     // enter controls on rising edge of ACC, exit controls on ACC off
     // exit controls on rising edge of gas press
     if (addr == 0x1D2) {
@@ -195,6 +189,13 @@ static void toyota_rx_hook(const CANPacket_t *to_push) {
       if (!enable_gas_interceptor) {
         gas_pressed = !GET_BIT(to_push, 4U);
       }
+    }
+
+    // wrap lateral controls on main
+    if (addr == 0x1D3) {
+      // ACC main switch on is a prerequisite to enter controls, exit controls immediately on main switch off
+      // Signal: PCM_CRUISE_2/MAIN_ON at 15th bit 
+      acc_main_on = GET_BIT(to_push, 15U);
     }
 
     // sample speed
