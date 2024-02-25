@@ -72,6 +72,7 @@ const CanMsg TOYOTA_INTERCEPTOR_TX_MSGS[] = {
   {.msg = {{ 0xaa, 0, 8, .check_checksum = false, .frequency = 83U}, { 0 }, { 0 }}},                        \
   {.msg = {{0x260, 0, 8, .check_checksum = true, .quality_flag = (lta), .frequency = 50U}, { 0 }, { 0 }}},  \
   {.msg = {{0x1D2, 0, 8, .check_checksum = true, .frequency = 33U}, { 0 }, { 0 }}},                         \
+  {.msg = {{0x1D3, 0, 8, .check_checksum = true, .frequency = 33U}, { 0 }, { 0 }}},                         \
   {.msg = {{0x224, 0, 8, .check_checksum = false, .frequency = 40U},                                        \
            {0x226, 0, 8, .check_checksum = false, .frequency = 40U}, { 0 }}},                               \
 
@@ -349,8 +350,9 @@ static bool toyota_tx_hook(const CANPacket_t *to_send) {
     }
 
     // AleSato's automatic brakehold
+    bool is_tss2 = (addr == 0x191);
     if ((addr == 0x344) && (alternative_experience & ALT_EXP_ALLOW_AEB)) {
-      if (vehicle_moving || gas_pressed || !acc_main_on) {
+      if ((is_tss2) && (vehicle_moving || gas_pressed || !acc_main_on)) {
         tx = false;
       }
     }
@@ -420,7 +422,7 @@ static int toyota_fwd_hook(int bus_num, int addr) {
     bool is_acc_msg = (addr == 0x343);
     // Block AEB when stoped to use as a automatic brakehold
     bool is_aeb_msg = ((addr == 0x344) && (alternative_experience & ALT_EXP_ALLOW_AEB));
-    bool block_msg = is_lkas_msg || (is_acc_msg && !toyota_stock_longitudinal) || (is_aeb_msg && !vehicle_moving && acc_main_on && !gas_pressed);
+    bool block_msg = is_lkas_msg || (is_acc_msg && !toyota_stock_longitudinal) || (is_tss2 && is_aeb_msg && !vehicle_moving && acc_main_on && !gas_pressed);
     if (!block_msg) {
       bus_fwd = 0;
     }
