@@ -59,7 +59,6 @@ const int TOYOTA_GAS_INTERCEPTOR_THRSLD = 805;
   {0x128, 1, 6}, {0x141, 1, 4}, {0x160, 1, 8}, {0x161, 1, 7}, {0x470, 1, 4},  /* DSU bus 1 */                                               \
   {0x411, 0, 8},  /* PCS_HUD */                                                                                                             \
   {0x750, 0, 8},  /* radar diagnostic address */                                                                                            \
-  {0x1D3, 0, 8},                                                                                                                            \
 
 const CanMsg TOYOTA_TX_MSGS[] = {
   TOYOTA_COMMON_TX_MSGS
