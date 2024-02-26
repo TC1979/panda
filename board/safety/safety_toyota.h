@@ -364,9 +364,9 @@ static bool toyota_tx_hook(const CANPacket_t *to_send) {
 
     // DP: Secret sauce.
     bool dp_valid_uds_msgs = false;
-    dp_valid_uds_msgs |= (GET_BYTES(to_send, 0, 4) == 0x10002141) || (GET_BYTES(to_send, 0, 4) == 0x60100241) || (GET_BYTES(to_send, 0, 4) == 0x69210241);
-    dp_valid_uds_msgs |= (GET_BYTES(to_send, 0, 4) == 0x10002142) || (GET_BYTES(to_send, 0, 4) == 0x60100242) || (GET_BYTES(to_send, 0, 4) == 0x10002142) || (GET_BYTES(to_send, 0, 4) == 0x69210242);
-    dp_valid_uds_msgs |= (GET_BYTES(to_send, 0, 4) == 0x11300540);
+    dp_valid_uds_msgs |= (GET_BYTES(to_send, 0, 4) == 0x10002141U) || (GET_BYTES(to_send, 0, 4) == 0x60100241U) || (GET_BYTES(to_send, 0, 4) == 0x69210241U);
+    dp_valid_uds_msgs |= (GET_BYTES(to_send, 0, 4) == 0x10002142U) || (GET_BYTES(to_send, 0, 4) == 0x60100242U) || (GET_BYTES(to_send, 0, 4) == 0x10002142U) || (GET_BYTES(to_send, 0, 4) == 0x69210242U);
+    dp_valid_uds_msgs |= (GET_BYTES(to_send, 0, 4) == 0x11300540U);
 
     if (invalid_uds_msg && !dp_valid_uds_msgs) {
       tx = false;
@@ -420,10 +420,7 @@ static int toyota_fwd_hook(int bus_num, int addr) {
     bool is_lkas_msg = ((addr == 0x2E4) || (addr == 0x412) || (addr == 0x191));
     // in TSS2 the camera does ACC as well, so filter 0x343
     bool is_acc_msg = (addr == 0x343);
-    bool is_tss2 = (addr == 0x191);
-    // Block AEB when stoped to use as a automatic brakehold
-    bool is_aeb_msg = ((addr == 0x344) && (alternative_experience & ALT_EXP_ALLOW_AEB));
-    bool block_msg = is_lkas_msg || (is_acc_msg && !toyota_stock_longitudinal) || (is_tss2 && is_aeb_msg && !vehicle_moving && acc_main_on && !gas_pressed);
+    bool block_msg = is_lkas_msg || (is_acc_msg && !toyota_stock_longitudinal);
     if (!block_msg) {
       bus_fwd = 0;
     }
