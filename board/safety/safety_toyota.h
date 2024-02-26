@@ -363,9 +363,10 @@ static bool toyota_tx_hook(const CANPacket_t *to_send) {
     bool invalid_uds_msg = (GET_BYTES(to_send, 0, 4) != 0x003E020FU) || (GET_BYTES(to_send, 4, 4) != 0x0U);
 
     // DP: Secret sauce.
-    bool dp_valid_uds_msgs = (GET_BYTES(to_send, 0, 4) == 0x10002141) || (GET_BYTES(to_send, 0, 4) == 0x60100241) || (GET_BYTES(to_send, 0, 4) == 0x69210241);
-    dp_valid_uds_msgs = dp_valid_uds_msgs || (GET_BYTES(to_send, 0, 4) == 0x10002142) || (GET_BYTES(to_send, 0, 4) == 0x60100242) || (GET_BYTES(to_send, 0, 4) == 0x10002142) || (GET_BYTES(to_send, 0, 4) == 0x69210242);
-    dp_valid_uds_msgs = dp_valid_uds_msgs || (GET_BYTES(to_send, 0, 4) == 0x11300540);
+    bool dp_valid_uds_msgs = false;
+    dp_valid_uds_msgs |= (GET_BYTES(to_send, 0, 4) == 0x10002141) || (GET_BYTES(to_send, 0, 4) == 0x60100241) || (GET_BYTES(to_send, 0, 4) == 0x69210241);
+    dp_valid_uds_msgs |= (GET_BYTES(to_send, 0, 4) == 0x10002142) || (GET_BYTES(to_send, 0, 4) == 0x60100242) || (GET_BYTES(to_send, 0, 4) == 0x10002142) || (GET_BYTES(to_send, 0, 4) == 0x69210242);
+    dp_valid_uds_msgs |= (GET_BYTES(to_send, 0, 4) == 0x11300540);
 
     if (invalid_uds_msg && !dp_valid_uds_msgs) {
       tx = false;
