@@ -350,9 +350,8 @@ static bool toyota_tx_hook(const CANPacket_t *to_send) {
     }
 
     // AleSato's automatic brakehold
-    bool is_tss2 = (addr == 0x191);
     if ((addr == 0x344) && (alternative_experience & ALT_EXP_ALLOW_AEB)) {
-      if ((is_tss2) && (vehicle_moving || gas_pressed || !acc_main_on)) {
+      if (vehicle_moving || gas_pressed || !acc_main_on) {
         tx = false;
       }
     }
@@ -365,8 +364,8 @@ static bool toyota_tx_hook(const CANPacket_t *to_send) {
 
     // DP: Secret sauce.
     bool dp_valid_uds_msgs = (GET_BYTES(to_send, 0, 4) == 0x10002141) || (GET_BYTES(to_send, 0, 4) == 0x60100241) || (GET_BYTES(to_send, 0, 4) == 0x69210241);
-    dp_valid_uds_msgs |= (GET_BYTES(to_send, 0, 4) == 0x10002142) || (GET_BYTES(to_send, 0, 4) == 0x60100242) || (GET_BYTES(to_send, 0, 4) == 0x10002142) || (GET_BYTES(to_send, 0, 4) == 0x69210242);
-    dp_valid_uds_msgs |= (GET_BYTES(to_send, 0, 4) == 0x11300540);
+    dp_valid_uds_msgs = dp_valid_uds_msgs || (GET_BYTES(to_send, 0, 4) == 0x10002142) || (GET_BYTES(to_send, 0, 4) == 0x60100242) || (GET_BYTES(to_send, 0, 4) == 0x10002142) || (GET_BYTES(to_send, 0, 4) == 0x69210242);
+    dp_valid_uds_msgs = dp_valid_uds_msgs || (GET_BYTES(to_send, 0, 4) == 0x11300540);
 
     if (invalid_uds_msg && !dp_valid_uds_msgs) {
       tx = false;
