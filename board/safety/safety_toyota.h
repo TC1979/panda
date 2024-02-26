@@ -82,7 +82,6 @@ const CanMsg TOYOTA_INTERCEPTOR_TX_MSGS[] = {
 
 #define AUTO_BRAKEHOLD_RX_CHECKS                                                                            \
   {.msg = {{0x1D3, 0, 8, .check_checksum = true, .frequency = 33U}, { 0 }, { 0 }}},                         \
-  {.msg = {{0x36D, 0, 7, .check_checksum = true, .frequency = 5U}, { 0 }, { 0 }}},                          \
 
 RxCheck toyota_lka_rx_checks[] = {
   TOYOTA_COMMON_RX_CHECKS(false)
