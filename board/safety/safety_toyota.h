@@ -433,9 +433,11 @@ static int toyota_fwd_hook(int bus_num, int addr) {
     bool is_lkas_msg = ((addr == 0x2E4) || (addr == 0x412) || (addr == 0x191));
     // in TSS2 the camera does ACC as well, so filter 0x343
     bool is_acc_msg = (addr == 0x343);
+    bool tss2 = (addr == 0x191);
+    bool lka_enabled = cruise_engaged || ((alternative_experience && ALT_EXP_ALKA) && acc_main_on);
     // Block AEB when stoped to use as a automatic brakehold
     bool is_aeb_msg = ((addr == 0x344) && (alternative_experience & ALT_EXP_ALLOW_AEB));
-    bool block_msg = is_lkas_msg || (is_acc_msg && !toyota_stock_longitudinal) || (is_aeb_msg && !vehicle_moving && acc_main_on && !gas_pressed);
+    bool block_msg = is_lkas_msg || (is_acc_msg && !toyota_stock_longitudinal) || (is_aeb_msg && !vehicle_moving && acc_main_on && !gas_pressed) || (!tss2 && !lka_enabled);
     if (!block_msg) {
       bus_fwd = 0;
     }
