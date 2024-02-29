@@ -219,7 +219,7 @@ bool brake_pressed = false;
 bool brake_pressed_prev = false;
 bool regen_braking = false;
 bool regen_braking_prev = false;
-bool cruise_engaged = false;
+bool acc_engaged = false;
 bool cruise_engaged_prev = false;
 struct sample_t vehicle_speed;
 bool vehicle_moving = false;
