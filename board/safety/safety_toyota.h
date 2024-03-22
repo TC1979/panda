@@ -89,10 +89,14 @@ const uint32_t TOYOTA_PARAM_ALT_BRAKE = 1UL << TOYOTA_PARAM_OFFSET;
 const uint32_t TOYOTA_PARAM_STOCK_LONGITUDINAL = 2UL << TOYOTA_PARAM_OFFSET;
 const uint32_t TOYOTA_PARAM_LTA = 4UL << TOYOTA_PARAM_OFFSET;
 
+const uint32_t TOYOTA_PARAM_SDSU = 64UL << TOYOTA_PARAM_OFFSET;
+
 bool toyota_alt_brake = false;
 bool toyota_stock_longitudinal = false;
 bool toyota_lta = false;
 int toyota_dbc_eps_torque_factor = 100;   // conversion factor for STEER_TORQUE_EPS in %: see dbc file
+
+bool toyota_sdsu = false;
 
 static uint32_t toyota_compute_checksum(const CANPacket_t *to_push) {
   int addr = GET_ADDR(to_push);
@@ -192,7 +196,7 @@ static void toyota_rx_hook(const CANPacket_t *to_push) {
     }
 
     bool stock_ecu_detected = addr == 0x2E4;  // STEERING_LKA
-    if (!toyota_stock_longitudinal && (addr == 0x343)) {
+    if (!toyota_stock_longitudinal && (addr == 0x343) && !toyota_sdsu) {
       stock_ecu_detected = true;  // ACC_CONTROL
     }
     generic_rx_checks(stock_ecu_detected);
@@ -336,6 +340,8 @@ static safety_config toyota_init(uint16_t param) {
   toyota_stock_longitudinal = GET_FLAG(param, TOYOTA_PARAM_STOCK_LONGITUDINAL);
   toyota_lta = GET_FLAG(param, TOYOTA_PARAM_LTA);
   toyota_dbc_eps_torque_factor = param & TOYOTA_EPS_FACTOR;
+
+  toyota_sdsu = GET_FLAG(param, TOYOTA_PARAM_SDSU);
 
   safety_config ret;
   if (toyota_stock_longitudinal) {
