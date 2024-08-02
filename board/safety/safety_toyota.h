@@ -177,7 +177,7 @@ static void toyota_rx_hook(const CANPacket_t *to_push) {
       acc_main_on = GET_BIT(to_push, 15U) != 0U;
     }
 
-    if (addr == 0x365 && toyota_unsupported_dsu_car) {
+    if ((addr == 0x365) && toyota_unsupported_dsu_car) {
       acc_main_on = GET_BIT(to_push, 0U) != 0U;
     }
 
