@@ -90,6 +90,7 @@ const uint32_t TOYOTA_PARAM_STOCK_LONGITUDINAL = 2UL << TOYOTA_PARAM_OFFSET;
 const uint32_t TOYOTA_PARAM_LTA = 4UL << TOYOTA_PARAM_OFFSET;
 
 const uint32_t TOYOTA_PARAM_SDSU = 64U << TOYOTA_PARAM_OFFSET;
+const uint32_t TOYOTA_PARAM_UNSUPPORTED_DSU_CAR = 128U << TOYOTA_PARAM_OFFSET;
 
 bool toyota_alt_brake = false;
 bool toyota_stock_longitudinal = false;
