@@ -89,13 +89,14 @@ const uint32_t TOYOTA_PARAM_ALT_BRAKE = 1UL << TOYOTA_PARAM_OFFSET;
 const uint32_t TOYOTA_PARAM_STOCK_LONGITUDINAL = 2UL << TOYOTA_PARAM_OFFSET;
 const uint32_t TOYOTA_PARAM_LTA = 4UL << TOYOTA_PARAM_OFFSET;
 
-const uint32_t TOYOTA_PARAM_SDSU = 64UL << TOYOTA_PARAM_OFFSET;
+const uint32_t TOYOTA_PARAM_SDSU = 64U << TOYOTA_PARAM_OFFSET;
 
 bool toyota_alt_brake = false;
 bool toyota_stock_longitudinal = false;
 bool toyota_lta = false;
 int toyota_dbc_eps_torque_factor = 100;   // conversion factor for STEER_TORQUE_EPS in %: see dbc file
 
+bool toyota_unsupported_dsu_car = false;
 bool toyota_sdsu = false;
 
 static uint32_t toyota_compute_checksum(const CANPacket_t *to_push) {
@@ -172,7 +173,11 @@ static void toyota_rx_hook(const CANPacket_t *to_push) {
     if (addr == 0x1D3) {
       // ACC main switch on is a prerequisite to enter controls, exit controls immediately on main switch off
       // Signal: PCM_CRUISE_2/MAIN_ON at 15th bit
-      acc_main_on = GET_BIT(to_push, 15U);
+      acc_main_on = GET_BIT(to_push, 15U) != 0U;
+    }
+
+    if (addr == 0x365 && toyota_unsupported_dsu_car) {
+      acc_main_on = GET_BIT(to_push, 0U) != 0U;
     }
 
     // sample speed
@@ -321,13 +326,20 @@ static bool toyota_tx_hook(const CANPacket_t *to_send) {
     // this address is sub-addressed. only allow tester present to radar (0xF)
     bool invalid_uds_msg = (GET_BYTES(to_send, 0, 4) != 0x003E020FU) || (GET_BYTES(to_send, 4, 4) != 0x0U);
 
-    // DP: Secret sauce.
-    bool dp_valid_uds_msgs = false;
-    dp_valid_uds_msgs |= (GET_BYTES(to_send, 0, 4) == 0x10002141U) || (GET_BYTES(to_send, 0, 4) == 0x60100241U) || (GET_BYTES(to_send, 0, 4) == 0x69210241U);
-    dp_valid_uds_msgs |= (GET_BYTES(to_send, 0, 4) == 0x10002142U) || (GET_BYTES(to_send, 0, 4) == 0x60100242U) || (GET_BYTES(to_send, 0, 4) == 0x10002142U) || (GET_BYTES(to_send, 0, 4) == 0x69210242U);
-    dp_valid_uds_msgs |= (GET_BYTES(to_send, 0, 4) == 0x11300540U);
+    // Enhanced BSM
+    bool top_valid_uds_msgs = ((GET_BYTES(to_send, 0, 4) == 0x10002141U) ||  // disable left BSM debug
+                              (GET_BYTES(to_send, 0, 4) == 0x60100241U) ||  // enable left BSM debug
+                              (GET_BYTES(to_send, 0, 4) == 0x69210241U) ||  // poll left BSM status
+                              (GET_BYTES(to_send, 0, 4) == 0x10002142U) ||  // disable right BSM debug
+                              (GET_BYTES(to_send, 0, 4) == 0x60100242U) ||  // enable right BSM debug
+                              (GET_BYTES(to_send, 0, 4) == 0x69210242U))    // poll right BSM status
+                              && (GET_BYTES(to_send, 4, 4) == 0x0U);
 
-    if (invalid_uds_msg && !dp_valid_uds_msgs) {
+    top_valid_uds_msgs |= (GET_BYTES(to_send, 0, 4) == 0x11300540U) &&       // automatic door locking and unlocking
+                         ((GET_BYTES(to_send, 4, 4) == 0x00004000U) ||      // unlock
+                          (GET_BYTES(to_send, 4, 4) == 0x00008000U));       // lock
+
+    if (invalid_uds_msg && !top_valid_uds_msgs) {
       tx = false;
     }
   }
@@ -340,7 +352,7 @@ static safety_config toyota_init(uint16_t param) {
   toyota_stock_longitudinal = GET_FLAG(param, TOYOTA_PARAM_STOCK_LONGITUDINAL);
   toyota_lta = GET_FLAG(param, TOYOTA_PARAM_LTA);
   toyota_dbc_eps_torque_factor = param & TOYOTA_EPS_FACTOR;
-
+  toyota_unsupported_dsu_car = GET_FLAG(param, TOYOTA_PARAM_UNSUPPORTED_DSU_CAR);
   toyota_sdsu = GET_FLAG(param, TOYOTA_PARAM_SDSU);
 
   safety_config ret;
